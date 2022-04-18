@@ -53,6 +53,25 @@ public class Client implements AutoCloseable {
                 String res = fromServer.readUTF();
                 System.out.println(res);
 
+                String fileToStore = null;
+                while (res.equalsIgnoreCase("Input file name")) {
+                    line = input.readLine();
+                    if (!line.isEmpty()) {
+                        fileToStore = dbFolder + line;
+                        File file = new File(fileToStore);
+                        if (!file.exists()) {
+                            System.out.println("File does not exist");
+                        } else {
+                            out.writeUTF(line);
+                            break;
+                        }
+                    }
+                }
+
+                //Response
+                res = fromServer.readUTF();
+                System.out.println(res);
+
                 if (res.equalsIgnoreCase("sending...")) {
                     send(out, dbFolder + line);
                 }

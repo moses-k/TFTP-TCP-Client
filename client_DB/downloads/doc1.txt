@@ -1,0 +1,12 @@
+https://www.youtube.com/watch?v=6V6G3RyxEMk
+Establish a Socket Connection
+
+To write a server application two sockets are needed. 
+
+A ServerSocket which waits for the client requests (when a client makes a new Socket())
+A plain old Socket socket to use for communication with the client.
+Communication
+getOutputStream() method is used to send the output through the socket.
+
+Close the Connection 
+After finishing,  it is important to close the connection by closing the socket as well as input/output streams.

@@ -13,6 +13,12 @@ public class Client implements AutoCloseable {
     private static DataInputStream input = null;
     private static DataInputStream fromServer = null;
     private static DataOutputStream out = null;
+    /**
+     * The default buffer size
+     */
+    public static final int DEFAULT_BUFFER_SIZE = 81920;
+    static boolean success = false;
+
 
     // constructor to put ip address and port
     public Client(String address, int port, String dbFolder) {
@@ -68,6 +74,42 @@ public class Client implements AutoCloseable {
                     }
                 }
 
+                while (res.equalsIgnoreCase("Enter file name")) {
+                    String fileName = input.readLine();
+                    out.writeUTF(fileName);
+                    //Response
+                    //if(fromServer.readUTF() !=null){
+                   res = fromServer.readUTF();
+                   System.out.println(res);
+                   String download = dbFolder+"downloads/";
+
+                    if (!res.equalsIgnoreCase("File does not exit")) {
+                        //read file and save it
+                        File file = new File(download + fileName);
+                        //Check if download folder exist
+                        if(!file.exists()){
+                            (new File(download)).mkdir();
+                        }
+
+                        boolean success = copyInputStreamToFile(fromServer, file);
+                        if (success) {
+                            System.out.println("File retrieved successful..");
+                            out.write(("received" + "\r\n").getBytes());
+                            return;
+                        } else {
+                            System.out.println("Error occurred");
+                        }
+                       out.flush();
+                       break;
+
+                    } else {
+                        //start
+                        out.writeUTF("2");
+                        break;
+                    }
+                }
+
+
                 //Response
                 res = fromServer.readUTF();
                 System.out.println(res);
@@ -75,6 +117,17 @@ public class Client implements AutoCloseable {
                 if (res.equalsIgnoreCase("sending...")) {
                     send(out, dbFolder + line);
                 }
+
+            /*    copyInputStreamToFile(in, file);
+                if (success) {
+                    System.out.println("File Retrieved successful");
+                    response = "File save successfully";
+                    //out.write((output + "\r\n").getBytes());
+                } else {
+                    response = "File not save";
+                    //out.write((output + "\r\n").getBytes());
+                }
+                out.flush();*/
 
             } catch (IOException i) {
                 System.out.println(i);
@@ -192,5 +245,32 @@ public class Client implements AutoCloseable {
         BigDecimal bigDecimal = new BigDecimal(seconds);
         bigDecimal = bigDecimal.setScale(1, BigDecimal.ROUND_UP);
         System.out.printf("sent %d bytes in %s seconds%n", bytesSent, bigDecimal.toPlainString());
+    }
+
+    private static boolean copyInputStreamToFile(DataInputStream inputStream, File file) throws IOException {
+        try {
+            success = false;
+
+            // append = false
+            try (FileOutputStream outputStream = new FileOutputStream(file, false)) {
+                int read;
+                byte[] bytes = new byte[DEFAULT_BUFFER_SIZE];
+                //byte[] bytes = new byte[510];
+                // while ((read = inputStream.read(bytes)) != -1) {
+
+                while ((read = inputStream.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                    System.out.println("File downloaded! "+ file.getAbsolutePath());
+                    success = true;
+                    break;
+                }
+                outputStream.flush();
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println("Error occured while writing to file " + e.getMessage());
+        }
+        return  false;
+
     }
 }

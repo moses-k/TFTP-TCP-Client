@@ -2,10 +2,12 @@ package com.tftp;
 
 import java.io.File;
 
-public class TFTPClient {
+public class
+TFTPClient {
     private static String host = "127.0.0.1";
+
     private static String dbFolder = "client_DB/";
-    private static Integer port = 5000;
+    private static Integer port = 69;
 
     public static void main(String[] args) {
 
